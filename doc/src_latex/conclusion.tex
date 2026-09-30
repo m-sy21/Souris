@@ -1,0 +1,70 @@
+\section{Conclusion}
+\label{sec:conclu}
+
+\subsection{Bilan technique}
+
+\paragraph{} Ce projet nous a permis de concevoir et d'implémenter une simulation multi-agents complète en Java, en appliquant rigoureusement les principes du génie logiciel enseignés en cours. Le résultat est un logiciel fonctionnel, configurable, visuellement riche et documenté.
+
+\paragraph{} Sur le plan architectural, nous avons respecté la séparation en couches préconisée par M. Liu, avec une dépendance strictement descendante entre les cinq couches du projet. L'interface \texttt{MobileInterface} assure le découplage entre l'IHM et le moteur, ce qui nous a permis de modifier l'un sans impacter l'autre à plusieurs reprises pendant le développement.
+
+\paragraph{} Sur le plan des design patterns, les cinq patterns appliqués se sont révélés être de véritables outils de conception et non de simples exercices académiques. Le Template Method a structuré la boucle de simulation de façon claire et extensible. Le Strategy a rendu le rendu graphique modulaire. Le Builder a simplifié la reconfiguration au démarrage. Le Singleton a garanti la cohérence du journal. La Simple Factory a centralisé la création des objets du jeu.
+
+\paragraph{} Le tableau~\ref{tab:bilan} récapitule les principales métriques du projet.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Métrique} & \textbf{Valeur} \\
+\hline
+Nombre de packages & 7 \\
+Nombre de fichiers Java & 36 \\
+Nombre de classes/interfaces & 34 \\
+Nombre de design patterns appliqués & 5 \\
+Nombre de classes de tests JUnit & 5 \\
+Nombre de librairies externes utilisées & 5 \\
+Niveaux de priorité du déplacement & 8 \\
+Types d'interactions possibles & 5 \\
+Types de fins de simulation & 3 \\
+Conditions d'accès au trésor & 4 \\
+\hline
+\end{tabular}
+\caption{Métriques du projet}
+\label{tab:bilan}
+\end{table}
+
+\bigskip
+
+\subsection{Difficultés surmontées}
+
+\paragraph{} Le principal défi de ce projet était la coordination entre les trois membres de l'équipe pour maintenir la cohérence d'un code réparti entre 36 fichiers. Nous avons surmonté ce défi grâce à une communication régulière, une répartition claire des responsabilités et une relecture systématique du code produit par chaque membre.
+
+\paragraph{} Sur le plan technique, les problèmes les plus difficiles à résoudre ont été la gestion des versions Java dans Eclipse, le chargement des resources depuis le classpath, et la prévention des boucles infinies de déplacement. Ces problèmes nous ont obligées à approfondir notre compréhension de l'environnement Java et d'Eclipse, ce qui constitue un apprentissage précieux.
+
+\bigskip
+
+\subsection{Perspectives d'amélioration}
+
+\paragraph{} Plusieurs fonctionnalités pourraient enrichir le projet dans une version future :
+
+\begin{itemize}
+    \item \textbf{Sauvegarde et chargement} : sérialisation Java pour sauvegarder l'état complet de la simulation et la recharger ultérieurement.
+    \item \textbf{Évolution génétique} : les descendants héritent non seulement de la couleur mais aussi du caractère de leurs parents, avec une probabilité de mutation. Cela introduirait une vraie dynamique évolutive.
+    \item \textbf{Plusieurs trésors} : plusieurs cibles avec des niveaux de difficulté différents et des conditions d'accès variées. La première souris à en atteindre un gagnerait, mais les autres resteraient disponibles.
+    \item \textbf{Obstacles dynamiques} : des obstacles qui se déplacent (par exemple une rivière qui change de lit), forçant les souris à adapter leur mémoire des cases dangereuses.
+    \item \textbf{Simulation réseau} : distribution de la simulation sur plusieurs machines avec partage des agents via sockets Java.
+    \item \textbf{Interface de configuration avancée} : permettre de modifier les poids de l'algorithme de déplacement en temps réel, pour expérimenter différentes stratégies.
+\end{itemize}
+
+\bigskip
+
+\subsection{Apprentissages}
+
+\paragraph{} Ce projet nous a appris à structurer un projet Java de taille conséquente en suivant les principes du génie logiciel. Nous avons compris concrètement pourquoi la séparation IHM/Moteur est importante : elle nous a permis de modifier l'interface graphique sans toucher au moteur, et inversement, à de nombreuses reprises pendant le développement.
+
+\paragraph{} L'application des design patterns nous a montré que ces patrons ne sont pas des constructions abstraites mais des solutions éprouvées à des problèmes récurrents. Chaque pattern que nous avons appliqué a résolu un problème concret de conception et amélioré la maintenabilité du code.
+
+\paragraph{} Enfin, les tests JUnit nous ont appris l'importance de tester chaque composant de façon indépendante. À plusieurs reprises, nos tests ont détecté des régressions introduites lors de modifications du code, ce qui nous a évité de livrer une version défectueuse.
+
+\paragraph{} Nous remercions encore M. Tianxiao Liu pour la qualité de son encadrement, la pertinence de ses programmes de démonstration, et sa disponibilité tout au long du semestre.

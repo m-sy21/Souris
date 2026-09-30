@@ -1,0 +1,306 @@
+\section{Spécification du projet}
+\label{sec:spec}
+
+\subsection{Vue d'ensemble du système}
+
+\paragraph{} La simulation modélise un \textbf{écosystème artificiel} dans lequel des agents autonomes --- les souris --- évoluent librement sur une grille 2D discrète. Le temps est discret : à chaque \textit{tour}, chaque agent effectue une action (déplacement, interaction, reproduction). La simulation est observable en temps réel via une interface graphique interactive.
+
+\paragraph{} Le système repose sur trois types d'entités principales. Les \textbf{agents mobiles} comprennent les souris adultes et les souriceaux. Les \textbf{entités fixes} comprennent les obstacles (bûches, rivières, rochers), les nourritures (fromage, pomme, graines) et le trésor. Enfin, les \textbf{entités transitoires} sont les flashes d'interaction, affichés pendant exactement 3 tours avant d'être supprimés automatiquement.
+
+\paragraph{} La simulation est entièrement paramétrable au démarrage : l'utilisateur choisit la taille de la grille, le nombre initial de souris, de nourritures, d'obstacles et la population maximale autorisée. Ces paramètres influencent directement la dynamique de la simulation.
+
+\bigskip
+
+\subsection{La grille de simulation}
+
+\paragraph{} La grille est une matrice de dimensions \texttt{GRID\_LINES} $\times$ \texttt{GRID\_COLS}, configurables entre 5 et 40 colonnes et entre 5 et 30 lignes. Chaque case est identifiée par ses coordonnées (ligne, colonne) et peut contenir une souris, un obstacle, une nourriture ou le trésor. Une case peut également être vide --- on parle alors de case libre.
+
+\paragraph{} Le tableau~\ref{tab:config_spec} récapitule les paramètres de configuration par défaut et leurs plages de valeurs autorisées.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Paramètre} & \textbf{Valeur par défaut} & \textbf{Plage autorisée} \\
+\hline
+Nombre de colonnes & 25 & 5 -- 40 \\
+Nombre de lignes & 17 & 5 -- 30 \\
+Nombre initial de souris & 20 & 1 -- 30 \\
+Nombre initial de nourritures & 18 & 1 -- 30 \\
+Nombre initial d'obstacles & 5 & 0 -- 20 \\
+Population maximale & 40 & 5 -- 80 \\
+Énergie initiale d'une souris & 80 & fixe \\
+Énergie maximale & 100 & fixe \\
+Perte d'énergie par tour & 1 & fixe \\
+Perte d'énergie sur obstacle & 10 & fixe \\
+\hline
+\end{tabular}
+\caption{Paramètres de configuration de la simulation}
+\label{tab:config_spec}
+\end{table}
+
+\bigskip
+
+\subsection{Les agents : les souris}
+
+\paragraph{} Chaque souris est une instance de la classe \texttt{Souris}, caractérisée par un ensemble d'attributs fixes (identifiant, sexe, caractère, couleur) et d'attributs dynamiques (énergie, âge, position, mémoire). Le tableau~\ref{tab:souris_attrs} présente l'ensemble de ces attributs.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|l|c|p{5.5cm}|}
+\hline
+\textbf{Attribut} & \textbf{Type} & \textbf{Valeur initiale} & \textbf{Description} \\
+\hline
+\texttt{id} & \texttt{int} & incrémental & Identifiant unique global \\
+\texttt{sexe} & \texttt{Sexe} & aléatoire & MALE ou FEMELLE \\
+\texttt{caractere} & \texttt{Caractere} & aléatoire & SINCERE, SOCIABLE, EGOISTE, MECHANTE \\
+\texttt{couleur} & \texttt{CouleurRobe} & aléatoire & GRIS, BLANC, MARRON \\
+\texttt{energie} & \texttt{int} & 80 & Décroît de 1 par tour, 0 = mort \\
+\texttt{age} & \texttt{int} & 0 & Incrémenté chaque tour \\
+\texttt{position} & \texttt{Case} & aléatoire & Case courante sur la grille \\
+\texttt{memoire} & \texttt{Memoire} & vide & Cases connues, relations, cibles \\
+\texttt{vivante} & \texttt{boolean} & true & Passe à false si énergie = 0 \\
+\hline
+\end{tabular}
+\caption{Attributs complets d'une souris}
+\label{tab:souris_attrs}
+\end{table}
+
+\paragraph{Cycle de vie d'une souris.} Une souris naît avec une énergie de 80 points. À chaque tour, elle perd 1 point d'énergie. Lorsqu'elle arrive sur une case contenant de la nourriture, elle la consomme et regagne un certain nombre de points selon le type de nourriture. Si son énergie atteint 0, elle meurt et est retirée de la grille. Une souris peut également se reproduire si elle rencontre une souris de sexe opposé dans les conditions requises, ce qui produit un souriceau.
+
+\bigskip
+
+\subsection{Les quatres caractères}
+
+\paragraph{} Le caractère est l'attribut le plus déterminant du comportement social d'une souris. Il est attribué aléatoirement à la naissance et ne peut pas changer. Il définit le rôle de la souris lors des interactions Donneur/Receveur et son rapport à l'information.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Caractère} & \textbf{Comportement en tant que Donneur} & \textbf{Comportement en tant que Receveur} \\
+\hline
+SINCERE & Partage la vraie position de nourriture lorsque son énergie est pleine & Fait confiance et suit l'information reçue \\
+\hline
+SOCIABLE & Partage si énergie $\geq$ 70, parfois avec de légères imprécisions & Suit l'information reçue \\
+\hline
+EGOISTE & Ne partage jamais d'information, garde ses connaissances pour elle & Accepte l'information mais ne la suit pas \\
+\hline
+MECHANTE & Donne toujours une fausse position pour piéger le Receveur & Ignore les informations reçues \\
+\hline
+\end{tabular}
+\caption{Comportements des quatres caractères}
+\label{tab:caracteres}
+\end{table}
+
+\paragraph{} Le tableau~\ref{tab:caracteres} met en évidence la diversité des comportements sociaux. Une souris SINCERE contribue positivement à la colonie en partageant des informations fiables. Une souris MECHANTE, en revanche, peut entraîner ses congénères vers des pièges, créant des interactions négatives visualisées par un flash rouge ``Oh ! Un piège !''.
+
+\bigskip
+
+\subsection{Les types de nourriture et d'obstacles}
+
+\paragraph{} Trois types de nourriture sont disponibles dans la simulation, chacun apportant un gain d'énergie différent. Le tableau~\ref{tab:nourriture} présente leurs caractéristiques.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|p{6cm}|}
+\hline
+\textbf{Type} & \textbf{Énergie gagnée} & \textbf{Représentation visuelle} \\
+\hline
+Fromage & $+25$ points & Sprite PNG fromage jaune \\
+Pomme & $+35$ points & Sprite PNG pomme rouge \\
+Graines & $+15$ points & Sprite PNG graines \\
+\hline
+\end{tabular}
+\caption{Types de nourriture et gains d'énergie}
+\label{tab:nourriture}
+\end{table}
+
+\paragraph{} Lorsque le bouton \texttt{+ Nourriture} est pressé, un type est choisi aléatoirement parmi les trois, avec une probabilité égale de $\frac{1}{3}$ pour chacun. La nourriture est placée sur une case libre aléatoire de la grille.
+
+\paragraph{} Trois types d'obstacles sont également disponibles, représentés par des sprites PNG sans fond blanc. Le tableau~\ref{tab:obstacles} en présente les caractéristiques.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|p{6cm}|}
+\hline
+\textbf{Type} & \textbf{Perte si collision} & \textbf{Représentation visuelle} \\
+\hline
+Bûche & $-10$ énergie & Sprite bûche marron (image PNG) \\
+Rivière & $-10$ énergie & Sprite rivière bleue (image PNG) \\
+Rocher & $-10$ énergie & Sprite obstacle (image PNG) \\
+\hline
+\end{tabular}
+\caption{Types d'obstacles et pénalités}
+\label{tab:obstacles}
+\end{table}
+
+\paragraph{} Une souris qui heurte un obstacle perd 10 points d'énergie et mémorise immédiatement la case comme dangereuse. Ce mécanisme garantit qu'une souris ne retombe \textbf{jamais deux fois} sur le même obstacle : la case est ajoutée à \texttt{Memoire.casesDangereuses} et sera systématiquement évitée (priorité 7 de l'algorithme de déplacement).
+
+\bigskip
+
+\subsection{L'algorithme de déplacement --- 8 niveaux de priorité}
+
+\paragraph{} À chaque tour, le moteur appelle \texttt{choisirProchaineCaseAvecAttraction()} pour chaque souris vivante. Cette méthode est le cœur de l'intelligence des agents : elle évalue 8 conditions dans l'ordre décroissant de priorité et retourne la meilleure case candidate. Le tableau~\ref{tab:priorites} décrit l'ensemble des priorités.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|c|p{4.5cm}|p{5.5cm}|}
+\hline
+\textbf{Priorité} & \textbf{Condition} & \textbf{Action résultante} \\
+\hline
+0 & Trésor actif, tour $\geq$ 100, énergie $\geq$ 85, âge $\geq$ 15 & Se diriger vers le trésor (priorité absolue) \\
+\hline
+1 & Cible partagée non nulle (\texttt{caseCiblePartage}) & Suivre la cible aveuglément, vraie ou fausse \\
+\hline
+2 & Cible nourriture mémorisée (\texttt{caseCibleNourriture}) & Se diriger vers la nourriture connue \\
+\hline
+3 & Cases nourriture mémorisées non vides & Retourner à une case de nourriture connue \\
+\hline
+3.5 & Trésor visible dans un rayon de 2 cases & Se diriger vers le trésor (découverte exploration) \\
+\hline
+4 & Nourriture visible dans un rayon de 5 cases & Se diriger vers la nourriture visible \\
+\hline
+5 & $\geq 3$ souris voisines (surpopulation locale) & Fuir vers une case moins dense \\
+\hline
+6 & Souris de sexe opposé visible & Attraction aléatoire (probabilité 35\%) \\
+\hline
+7 & Cases dangereuses dans la mémoire & Évitement systématique \\
+\hline
+8 & Aucune condition précédente satisfaite & Déplacement aléatoire parmi les cases libres \\
+\hline
+\end{tabular}
+\caption{Algorithme de déplacement --- 8 niveaux de priorité décroissante}
+\label{tab:priorites}
+\end{table}
+
+\paragraph{} Cet algorithme garantit que les souris adoptent un comportement cohérent et prévisible. Une souris qui connaît le trésor et a l'énergie suffisante y fondera directement. Une souris affamée ignorera le trésor pour chercher de la nourriture. Une souris qui a reçu une fausse information d'une souris MECHANTE suivra quand même la cible — jusqu'à l'obstacle.
+
+\paragraph{Anti-boucle de déplacement.} Sans précaution, les souris peuvent se retrouver bloquées dans des boucles entre deux cases. Pour éviter ce phénomène, un historique des 6 dernières positions est maintenu pour chaque souris. Avant de choisir une case candidate, les cases récemment visitées sont exclues de la liste des candidats. Ce mécanisme est implémenté via une \texttt{Deque<String>} par souris dans \texttt{historiquePositions}.
+
+\bigskip
+
+\subsection{Les interactions sociales}
+
+\paragraph{} Les interactions sociales constituent la richesse comportementale de la simulation. Elles surviennent automatiquement quand deux souris se trouvent sur des cases adjacentes.
+
+\subsubsection{Le partage Donneur $\rightarrow$ Receveur}
+
+\paragraph{} L'interaction la plus importante est le partage d'information entre un Donneur et un Receveur. Le protocole est le suivant : le Donneur vérifie s'il a l'énergie pleine et s'il connaît une case de nourriture. Si oui, et si la paire n'a pas déjà échangé (mémorisé dans l'ensemble \texttt{pairesDejaVues}), il transmet la position de la nourriture au Receveur. Ce dernier la mémorise dans \texttt{caseCiblePartage} et s'y dirige dès le tour suivant (priorité 1).
+
+\paragraph{} Si le Donneur est MECHANTE, il transmet une fausse position. Le Receveur, ne sachant pas distinguer une vraie d'une fausse information, la suit aveuglément. Si la case indiquée contient un obstacle, un flash PIEGE rouge ``Oh ! Un piège !'' s'affiche sur la souris piégée, qui perd 10 points d'énergie supplémentaires et mémorise la case comme dangereuse.
+
+\subsubsection{La reproduction}
+
+\paragraph{} Deux souris de sexe opposé sur des cases adjacentes peuvent se reproduire selon la probabilité définie par l'équation~\ref{eq:repro}. Lorsque la reproduction a lieu, un souriceau est créé sur une case libre adjacente. Il hérite de la couleur d'un parent (tirage aléatoire), reçoit un caractère aléatoire et naît avec l'énergie initiale de 80 points. Un flash REPRODUCTION (cœur $\heartsuit$) est affiché entre les deux parents. L'événement est journalisé dans le journal de chacun des deux parents et du souriceau.
+
+\begin{equation}
+P(\text{repro}) = 0{,}20 + \frac{\bar{E}}{200} \pm \Delta_{car}
+\label{eq:repro}
+\end{equation}
+
+où $\bar{E}$ est l'énergie moyenne des deux parents normalisée sur 100, et $\Delta_{car}$ est un bonus ou malus selon le caractère ($+0.05$ pour SINCERE, $-0.05$ pour MECHANTE).
+
+\bigskip
+
+\subsection{La mémoire des souris}
+
+\paragraph{} La mémoire est l'un des composants les plus importants de la simulation. Elle permet à chaque souris d'apprendre de ses expériences passées et d'adopter des comportements de plus en plus sophistiqués au fil du temps. Elle est représentée par la classe \texttt{Memoire}, dont le tableau~\ref{tab:memoire} décrit les attributs.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Attribut} & \textbf{Type} & \textbf{Rôle dans le comportement} \\
+\hline
+\texttt{casesNourritureConnues} & \texttt{List<Case>} & Cases où de la nourriture a déjà été trouvée (priorité 3) \\
+\hline
+\texttt{casesDangereuses} & \texttt{List<Case>} & Cases avec obstacle mémorisé, évitées systématiquement (priorité 7) \\
+\hline
+\texttt{relationSociales} & \texttt{List<RelationSociale>} & Souris connues (amitié, reproduction), condition trésor \\
+\hline
+\texttt{caseCiblePartage} & \texttt{Case} & Cible reçue d'un Donneur (priorité 1, vraie ou fausse) \\
+\hline
+\texttt{caseCibleNourriture} & \texttt{Case} & Cible nourriture mémorisée (priorité 2) \\
+\hline
+\end{tabular}
+\caption{Attributs de la classe Memoire}
+\label{tab:memoire}
+\end{table}
+
+\paragraph{} La mémoire est enrichie à chaque événement. Quand une souris trouve de la nourriture, la case est ajoutée à \texttt{casesNourritureConnues}. Quand elle heurte un obstacle, la case est ajoutée à \texttt{casesDangereuses}. Quand elle reçoit une information d'un Donneur, la case est mémorisée dans \texttt{caseCiblePartage}. Quand elle rencontre une autre souris, une \texttt{RelationSociale} est créée et ajoutée à \texttt{relationSociales}.
+
+\paragraph{Importance pour le trésor.} La mémoire joue un rôle crucial dans la condition d'accès au trésor. Une souris doit avoir mémorisé au moins 5 cases de nourriture et entretenir au moins 2 relations sociales pour pouvoir l'obtenir. Ces conditions garantissent que seules les souris ayant suffisamment exploré et interagi peuvent gagner.
+
+\bigskip
+
+\subsection{La cible dynamique : le trésor}
+
+\paragraph{} Le trésor est la fonctionnalité la plus originale du projet. Il introduit une mécanique de jeu progressive : une cible cachée qui devient accessible après un certain nombre de tours, sous des conditions strictes, et qui entraîne la fin de la simulation si elle est atteinte.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|c|p{9cm}|}
+\hline
+\textbf{Tour} & \textbf{Événement} \\
+\hline
+50 & Le trésor apparaît sur le bord de la grille. Il est grisé, avec un cadenas doré et un compte à rebours ``T-X'' visible. \\
+\hline
+100 & Le trésor s'illumine en doré avec un halo pulsant animé. La course commence. \\
+\hline
+100--300 & Fenêtre de recherche active. Les souris éligibles cherchent activement le trésor. \\
+\hline
+300 & La fenêtre se ferme. La simulation continue jusqu'à extinction de la colonie. \\
+\hline
+Extinction & SAD END : toutes les souris mortes sans trésor. Relance avec 3 nouvelles souris. \\
+\hline
+\end{tabular}
+\caption{Chronologie complète du trésor}
+\label{tab:tresor_chrono}
+\end{table}
+
+\paragraph{Conditions d'obtention.} Pour obtenir le trésor, une souris doit remplir simultanément les quatre conditions suivantes au moment où elle arrive sur la case :
+
+\begin{itemize}
+    \item Énergie $\geq$ 85 points sur 100 (être en bonne santé).
+    \item Âge $\geq$ 15 tours (avoir de l'expérience).
+    \item Mémoire contenant au moins 5 cases de nourriture connues (avoir bien exploré).
+    \item Au moins 2 relations sociales mémorisées (avoir interagi avec la colonie).
+\end{itemize}
+
+\paragraph{} Si une souris arrive sur le trésor sans remplir toutes ces conditions, elle reçoit un message explicatif dans son journal selon la condition manquante, et sa cible trésor est effacée. Elle devra se préparer avant de réessayer.
+
+\paragraph{Les trois fins de simulation.} La simulation peut se terminer de trois façons distinctes, chacune donnant lieu à un écran de fin spécifique :
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Type de fin} & \textbf{Condition} & \textbf{Écran affiché} \\
+\hline
+Victoire & Une souris atteint le trésor entre les tours 100 et 300 & Écran doré avec identité de la gagnante \\
+\hline
+SAD END & Toutes les souris meurent sans avoir trouvé le trésor & Écran rouge sombre, relance avec 3 souris \\
+\hline
+Colonisation optimale & Le score de colonisation se stabilise pendant 10 tours consécutifs & Écran avec note D à S+ et barre de score \\
+\hline
+\end{tabular}
+\caption{Les trois fins de simulation possibles}
+\label{tab:fins}
+\end{table}
+
+\paragraph{} Le score de colonisation (équation~\ref{eq:score}) mesure la progression de la colonie à chaque tour. Il est calculé comme une somme pondérée de quatre critères : la couverture de la grille ($C$), l'énergie moyenne normalisée ($E$), la diversité des zones occupées dans les 4 quadrants ($D$) et la taille relative de la population ($P$).
+
+\begin{equation}
+\text{Score} = 40 \times C + 30 \times E + 20 \times D + 10 \times P
+\label{eq:score}
+\end{equation}

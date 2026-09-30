@@ -1,0 +1,125 @@
+\section{Manuel utilisateur}
+\label{sec:manuel}
+
+\paragraph{} Cette section décrit le fonctionnement complet du logiciel du point de vue de l'utilisateur final.
+
+\subsection{Environnement de développement}
+
+\paragraph{} Le projet a été développé et testé sous \textbf{Eclipse IDE for Java
+Developers} avec \textbf{Java 8 (JDK 1.8)}. Le projet est livré sous forme d'un
+dossier \texttt{ProjetSouris/} contenant les sources, les librairies et les
+fichiers de configuration Eclipse (\texttt{.classpath}, \texttt{.project},
+\texttt{.settings/}).
+
+\paragraph{} Les cinq librairies externes sont incluses dans le dossier
+\texttt{libs/} et référencées automatiquement par Eclipse via le
+\texttt{.classpath}. Aucune installation supplémentaire n'est requise : le
+projet est directement opérationnel après import dans Eclipse via
+\texttt{File $\rightarrow$ Import $\rightarrow$ Existing Projects into Workspace}.
+
+\subsection{Configuration initiale de la simulation}
+
+\paragraph{} Au lancement, la fenêtre principale s'ouvre avec l'overlay de configuration affiché sur la grille. L'utilisateur peut régler les paramètres à l'aide des boutons \texttt{[-]} et \texttt{[+]} de chaque ligne. Le tableau~\ref{tab:config_manuel} récapitule les paramètres disponibles.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Paramètre} & \textbf{Minimum} & \textbf{Maximum} & \textbf{Valeur par défaut} \\
+\hline
+Nombre de colonnes & 5 & 40 & 25 \\
+Nombre de lignes & 5 & 30 & 17 \\
+Nombre de souris & 1 & 30 & 20 \\
+Nombre de nourritures & 1 & 30 & 18 \\
+Nombre d'obstacles & 0 & 20 & 5 \\
+Population maximale & 5 & 80 & 40 \\
+\hline
+\end{tabular}
+\caption{Paramètres de configuration disponibles au démarrage}
+\label{tab:config_manuel}
+\end{table}
+
+\paragraph{} Une fois satisfait de la configuration, cliquer sur le bouton \textbf{Lancer la simulation}. L'overlay disparaît et la grille de simulation s'affiche en temps réel.
+
+\bigskip
+
+\subsection{Contrôle de la simulation en cours}
+
+\paragraph{} Le panneau de contrôle à droite de la fenêtre contient huit boutons. Leur rôle est détaillé dans le tableau~\ref{tab:controles_manuel}.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+\textbf{Bouton} & \textbf{Action} \\
+\hline
+Démarrer & Lance ou reprend la simulation après une pause \\
+\hline
+Pause & Met la simulation en pause. Cliquer sur Démarrer pour reprendre \\
+\hline
+Réinitialiser & Repart de zéro avec la même configuration (toutes les souris, nourritures, obstacles recréés) \\
+\hline
+Vitesse + & Réduit le délai entre les tours, accélère la simulation \\
+\hline
+Vitesse $-$ & Augmente le délai entre les tours, ralentit la simulation \\
+\hline
++ Souris & Ajoute une souris avec des attributs aléatoires sur une case libre \\
+\hline
++ Nourriture & Ajoute une nourriture aléatoire (fromage, pomme ou graines) sur une case libre \\
+\hline
++ Obstacle & Ajoute un obstacle aléatoire (bûche, rivière ou rocher) sur une case libre \\
+\hline
+\end{tabular}
+\caption{Boutons de contrôle et leurs actions}
+\label{tab:controles_manuel}
+\end{table}
+
+\bigskip
+
+\subsection{Lecture des statistiques}
+
+\paragraph{} Le \texttt{StatsPanel} à gauche de la fenêtre affiche en temps réel cinq types d'informations :
+
+\begin{itemize}
+    \item \textbf{Compteurs} : le tour courant, le nombre de souris vivantes, le nombre cumulé de naissances, de morts, de partages D$\rightarrow$R et de reproductions depuis le début de la simulation.
+    \item \textbf{Courbe Population/Nourriture} : l'évolution du nombre de souris vivantes (bleu) et du nombre de nourritures disponibles (vert) au fil des tours.
+    \item \textbf{Courbe Énergie} : l'évolution de l'énergie moyenne de la colonie (orange). Une baisse indique que les souris peinent à trouver de la nourriture.
+    \item \textbf{Camembert des interactions} : la proportion de chaque type d'interaction depuis le début (partages en vert, amitiés en jaune, mensonges en rouge, reproductions en bleu).
+    \item \textbf{Formules et score} : les formules de probabilité utilisées par le moteur et le score de colonisation courant, calculé selon l'équation~\ref{eq:score}.
+\end{itemize}
+
+\bigskip
+
+\subsection{Consulter le journal d'une souris}
+
+\paragraph{} Un clic sur n'importe quelle souris visible dans la grille ouvre (ou met à jour) la \texttt{JournalFenetre}. Cette fenêtre affiche :
+
+\begin{itemize}
+    \item \textbf{En-tête} : l'identité complète de la souris (ID, caractère, sexe, couleur, énergie actuelle, âge, rôle, nombre de cases mémorisées et nombre de relations sociales).
+    \item \textbf{Journal} : toutes les entrées du journal intime de la souris, en ordre anti-chronologique (la plus récente en haut), avec un code couleur par type d'événement.
+\end{itemize}
+
+
+\bigskip
+
+\subsection{Suivre l'évolution du trésor}
+
+\paragraph{} À partir du \textbf{tour 50}, un coffre apparaît sur le bord de la grille. Il est affiché en grisé avec un cadenas doré et un compte à rebours visible dans la case. La barre d'état en bas du \texttt{GameDisplay} affiche le message \textit{``Trésor scellé — s'ouvre au tour 100''}.
+
+\paragraph{} À partir du \textbf{tour 100}, la case du trésor change d'apparence : elle devient jaune dorée avec un halo pulsant animé et le label ``TRESOR''. La barre d'état affiche désormais \textit{``TRÉSOR ACTIF --- Temps restant : X tours''}, où X décroît à chaque tour jusqu'à 300.
+
+\paragraph{} Si une souris atteint le trésor et remplit les conditions (énergie $\geq$ 85, âge $\geq$ 15, mémoire $\geq$ 5 cases, $\geq$ 2 relations), la simulation se termine immédiatement avec l'écran de victoire doré.
+
+\bigskip
+
+\subsection{Interprétation des fins de simulation}
+
+\paragraph{} La simulation peut se terminer de trois façons, chacune donnant lieu à un écran de fin spécifique avec un bouton de relance :
+
+\paragraph{Victoire (écran doré).} Une souris a réussi à atteindre le trésor entre les tours 100 et 300 en remplissant toutes les conditions. L'écran affiche son identité complète et le message ``Elle restera dans les mémoires de la colonie pour toujours !'' Le bouton ``Nouvelle aventure'' relance une nouvelle simulation.
+
+\paragraph{SAD END (écran rouge).} Toutes les souris sont mortes sans que le trésor n'ait été trouvé. Cela peut arriver parce que la fenêtre de recherche 100--300 s'est fermée sans succès, et la simulation a continué jusqu'à l'extinction totale de la colonie. Le bouton ``Nouvelle colonie (3 souris)'' relance la simulation avec seulement 3 nouvelles souris.
+
+\paragraph{Colonisation optimale (écran bleu).} Le score de colonisation s'est stabilisé pendant 10 tours consécutifs, indiquant que le système a atteint un équilibre. L'écran affiche une note de D à S+ selon le score final et une barre de progression. Le bouton ``Nouvelle simulation'' relance avec les mêmes paramètres.

@@ -1,0 +1,22 @@
+\ProvidesPackage{macro}
+\usepackage{graphicx}
+\usepackage{float}
+
+% Macro figure sans référence
+\newcommand{\noreffig}[3]{
+  \begin{figure}[H]
+  \begin{center}
+  \includegraphics[width=#2, height=#3, keepaspectratio]{#1}
+  \end{center}
+  \end{figure}
+}
+
+% Macro figure avec référence
+\newcommand{\reffig}[4]{
+  \begin{figure}[H]
+  \begin{center}
+  \includegraphics[width=#2, height=#3, keepaspectratio]{#1}
+  \caption{#4}
+  \end{center}
+  \end{figure}
+}

@@ -1,0 +1,59 @@
+\section{Introduction}
+
+\subsection{Contexte académique}
+
+\paragraph{} Ce projet s'inscrit dans le cadre du cours de \textbf{Génie Logiciel et Projet (GLP)} de Licence 2 Informatique à CY Cergy Paris Université, encadré par M. Tianxiao LIU. Il représente l'aboutissement de l'ensemble des notions vues en cours et en TD : conception orientée objet, design patterns, séparation IHM/Moteur, tests automatisés, journalisation et documentation.
+
+\paragraph{} Le cours GLP s'appuie sur une progression pédagogique construite autour de cinq programmes de démonstration fournis par M. Liu : \textit{Chronometer} (introduction à la séparation IHM/Moteur), \textit{tree\_v1} (design patterns Builder, Template Method, Singleton, Simple Factory), \textit{tree\_v2} (pattern Strategy), \textit{tree\_v3} (journalisation Log4j dans la structure finale), et \textit{Aircraft}/\textit{Train} (simulation multi-agents avec threads). Notre projet intègre et dépasse l'ensemble de ces démonstrations.
+
+\subsection{Présentation du sujet}
+
+\paragraph{} Le sujet consiste à concevoir et implémenter une \textbf{simulation multi-agents} dans laquelle des souris autonomes évoluent sur une grille 2D. Chaque souris est un agent indépendant qui perçoit son environnement local, prend des décisions selon ses attributs internes, interagit avec les autres agents et adapte son comportement en fonction de ce qu'elle mémorise.
+
+\paragraph{} La simulation comporte plusieurs niveaux de complexité croissante. Au niveau le plus simple, les souris se déplacent aléatoirement et mangent pour survivre. À un niveau intermédiaire, elles interagissent socialement (partage d'informations, reproduction, amitié), développent une mémoire des lieux et des relations, et adoptent des comportements stratégiques selon leur caractère. Au niveau le plus avancé, une \textbf{cible dynamique} (le trésor) introduit une mécanique de jeu progressive avec une condition de victoire, une fenêtre temporelle et trois fins de simulation possibles.
+
+\subsection{Objectifs du projet}
+
+\paragraph{} Les objectifs techniques du projet sont les suivants :
+
+\begin{itemize}
+    \item Concevoir une architecture logicielle en couches séparées, respectant le principe de séparation IHM/Moteur.
+    \item Appliquer au moins cinq design patterns issus du cours .
+    \item Implémenter une simulation multi-agents avec comportements émergents.
+    \item Produire une interface graphique interactive et informative en Java Swing.
+    \item Écrire des tests automatisés avec JUnit 4 couvrant les composants principaux.
+    \item Journaliser les événements de la simulation avec Log4j.
+    \item Documenter le projet avec ce rapport \LaTeX{} suivant les normes du cours.
+\end{itemize}
+
+\subsection{Fonctionnalités implémentées}
+
+\paragraph{} Le projet final implémente les fonctionnalités suivantes :
+
+\begin{itemize}
+    \item Une \textbf{grille 2D configurable} (5 à 40 colonnes, 5 à 30 lignes) avec obstacles, nourriture et agents.
+    \item Trois types d'\textbf{obstacles} : bûche, rivière, rocher.
+    \item Trois types de \textbf{nourriture} : fromage (+25 énergie), pomme (+35 énergie), graines (+15 énergie).
+    \item Des \textbf{souris autonomes} avec 4 caractères, 2 sexes, 3 couleurs, une énergie et une mémoire.
+    \item Un \textbf{algorithme de déplacement} à 8 niveaux de priorité avec anti-boucle (historique 6 positions).
+    \item Un \textbf{système de mémoire} : cases de nourriture connues, cases dangereuses, relations sociales, cibles.
+    \item Des \textbf{interactions sociales} : partage D$\rightarrow$R (vraie ou fausse info), reproduction, amitié, piège.
+    \item Des \textbf{flashes visuels} pour chaque type d'interaction (bulle, cœur, nuage rouge).
+    \item Des \textbf{cycles évolutifs} : jusqu'à 5 générations de souris avec extinction et renouvellement.
+    \item Une \textbf{cible dynamique} (trésor) avec fenêtre temporelle 100--300 tours et 3 fins de simulation.
+    \item Un \textbf{score de colonisation} calculé à chaque tour (formule pondérée sur 100 points).
+    \item Une \textbf{IHM complète} : grille animée, StatsPanel dynamique, JournalFenetre par souris, 8 boutons.
+    \item Des \textbf{tests JUnit} sur 5 classes couvrant tous les composants principaux.
+    \item Une \textbf{journalisation} Log4j en console, en fichier texte et en fichier HTML.
+\end{itemize}
+
+\subsection{Structure du rapport}
+
+\paragraph{} Ce rapport est organisé comme suit :
+\begin{itemize}
+    \item \textbf{Section 2 --- Spécification} : description détaillée des règles, attributs et comportements.
+    \item \textbf{Section 3 --- Réalisation technique} : architecture, design patterns, algorithmes, code et schémas.
+    \item \textbf{Section 4 --- Manuel utilisateur} : guide d'utilisation du logiciel.
+    \item \textbf{Section 5 --- Déroulement du projet} : organisation, problèmes rencontrés, tests.
+    \item \textbf{Section 6 --- Conclusion} : bilan, perspectives et apprentissages.
+\end{itemize}

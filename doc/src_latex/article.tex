@@ -1,0 +1,101 @@
+\documentclass[11pt, french]{article}
+\usepackage[french]{babel}
+\selectlanguage{french}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{macro}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{float}
+\usetikzlibrary{shapes,arrows.meta,positioning,calc}
+
+\usepackage{geometry}
+\geometry{a4paper, left=20mm, right=20mm, top=20mm, bottom=20mm}
+
+\definecolor{bleucours}{RGB}{13,71,161}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{commentcolor}{RGB}{106,153,85}
+\definecolor{keywordcolor}{RGB}{86,156,214}
+\definecolor{stringcolor}{RGB}{206,145,120}
+
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries\color{bleucours}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{bleucours!80!black}}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{bleucours!60!black}}{\thesubsubsection.}{0.5em}{}
+
+\lstdefinestyle{java}{
+    language=Java,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{keywordcolor}\bfseries,
+    commentstyle=\color{commentcolor}\itshape,
+    stringstyle=\color{stringcolor},
+    numberstyle=\tiny\color{gray},
+    numbers=left, stepnumber=1,
+    frame=single, framerule=0.4pt,
+    rulecolor=\color{bleucours!30},
+    tabsize=4, showstringspaces=false,
+    breaklines=true, captionpos=b,
+    xleftmargin=1.5em, framexleftmargin=1.5em,
+    morekeywords={String,List,ArrayList,HashMap,HashSet,Override,Consumer,Case,Souris,Grille}
+}
+\lstset{style=java}
+
+\begin{document}
+\input{titre.tex}
+\tableofcontents
+\listoffigures
+\listoftables
+\newpage
+
+\section*{\color{bleucours}Remerciements}
+\addcontentsline{toc}{section}{Remerciements}
+
+Les autrices souhaitent remercier vivement \textbf{M. Tianxiao LIU}, enseignant-chercheur à CY Cergy Paris Université, pour son encadrement bienveillant et rigoureux tout au long du cours de Génie Logiciel et Projet (GLP).
+
+Nous le remercions particulièrement pour :
+
+\begin{itemize}
+    \item Les \textbf{cinq programmes de démonstration} qui nous ont servi de modèles architecturaux :
+    \begin{itemize}
+        \item \textit{Chronometer} (TD introductif — séparation IHM/Moteur)
+        \item \textit{tree\_v1} (Builder, Template Method, Singleton, Simple Factory)
+        \item \textit{tree\_v2} (Strategy pattern — PaintStrategy)
+        \item \textit{tree\_v3} (Log4j, structure finale du projet)
+        \item \textit{Aircraft} et \textit{Train} (simulation multi-agents)
+    \end{itemize}
+    \item L'\textbf{exemple de rapport \LaTeX} pour la structure de ce document.
+    \item Les \textbf{cinq librairies} mises à disposition :
+    \begin{itemize}
+        \item \texttt{log4j-1.2.17.jar} — journalisation (TD 6)
+        \item \texttt{jfreechart-1.0.19.jar} et \texttt{jcommon-1.0.23.jar} — graphiques
+        \item \texttt{junit-4.11.jar} et \texttt{hamcrest-core-1.3.jar} — tests automatisés (TD 5)
+    \end{itemize}
+    \item Les \textbf{slides de cours}, les TDs CNP, les ateliers de tests et de journalisation.
+    \item Sa \textbf{disponibilité} pour répondre à nos questions lors des séances.
+\end{itemize}
+
+\input{introduction.tex}
+\input{specification.tex}
+\input{realisation.tex}
+\input{manuel.tex}
+\input{deroulement.tex}
+\input{conclusion.tex}
+
+\newpage
+\bibliographystyle{alpha}
+\bibliography{bibliographies}
+\nocite{*}
+\end{document}

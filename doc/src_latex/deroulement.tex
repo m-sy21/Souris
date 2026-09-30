@@ -1,0 +1,114 @@
+\section{Déroulement du projet}
+\label{sec:deroul}
+
+\subsection{Organisation du travail en équipe}
+
+\paragraph{} Le projet a été réalisé en équipe de trois personnes sur plusieurs semaines. Nous avons adopté une organisation de travail itérative et collaborative : chaque fonctionnalité était discutée ensemble, implémentée par l'une d'entre nous, puis revue et testée par les deux autres. Cette approche nous a permis de maintenir une cohérence dans le code et de détecter rapidement les erreurs.
+
+\paragraph{} Le tableau~\ref{tab:repartition} présente la répartition principale des responsabilités au sein de l'équipe.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+\textbf{Membre} & \textbf{Responsabilités principales} \\
+\hline
+SIMYA Meriem & Moteur de simulation (\texttt{Environnement.java}), algorithme de déplacement à 8 priorités, système de mémoire, cycles évolutifs \\
+\hline
+LAIFAOUI Ines & Interface graphique (\texttt{GameDisplay.java}, \texttt{StatsPanel.java}), système de flashes visuels, \texttt{PaintStrategy}, sprites PNG \\
+\hline
+ANOUD Salma & Interactions D$\rightarrow$R, système trésor, tests JUnit, journalisation Log4j, rapport \LaTeX \\
+\hline
+\end{tabular}
+\caption{Répartition du travail au sein de l'équipe}
+\label{tab:repartition}
+\end{table}
+
+\bigskip
+
+\subsection{Problèmes rencontrés et solutions apportées}
+
+\paragraph{} Le développement d'un projet de cette envergure a inévitablement donné lieu à de nombreux problèmes techniques. Nous décrivons ici les huit problèmes les plus significatifs rencontrés, ainsi que les solutions que nous avons apportées.
+
+\subsubsection{Problème 1 : Conflit de versions Java dans Eclipse}
+
+\paragraph{} Lors des premiers tests, Eclipse compilait le projet avec une version Java 11 ou supérieure, alors que notre code était conçu pour Java 8. Ce conflit se manifestait par l'erreur \texttt{StringConcatFactory cannot be resolved} au lancement, qui bloquait entièrement l'exécution de la simulation.
+
+\paragraph{} Pour résoudre ce problème, nous avons ajouté le fichier \texttt{.settings/org.eclipse.jdt.core.prefs} dans le projet, avec les directives \texttt{compliance=1.8}, \texttt{source=1.8} et \texttt{targetPlatform=1.8}. Nous avons également mis à jour le \texttt{.classpath} pour référencer explicitement le conteneur JRE JavaSE-1.8. Ces deux fichiers sont désormais inclus dans le projet livré, ce qui garantit que n'importe quel poste Eclipse compilera correctement.
+
+\subsubsection{Problème 2 : Images des sprites non trouvées au lancement}
+
+\paragraph{} Dans une première version, \texttt{PaintStrategy} cherchait les sprites de souris via un chemin relatif simple (par exemple \texttt{"souris\_gris\_male\_right.png"}). Ce chemin n'était pas résolu correctement par Eclipse, qui cherchait les images dans le répertoire courant d'exécution plutôt que dans le répertoire \texttt{src/resources/}.
+
+\paragraph{} La solution a consisté à utiliser \texttt{getClass().getClassLoader().getResourceAsStream("resources/souris\_xxx.png")} pour charger les images depuis le classpath. Étant donné que le dossier \texttt{src/} est configuré comme source folder dans le \texttt{.classpath}, le répertoire \texttt{src/resources/} est automatiquement inclus dans le classpath, et les images sont trouvées quelle que soit la façon dont Eclipse lance le programme.
+
+\subsubsection{Problème 3 : Fichiers de configuration Log4j non trouvés}
+
+\paragraph{} Dans la version initiale, \texttt{LoggerUtility} chargeait les fichiers \texttt{.properties} via un chemin fichier relatif (\texttt{"src/log/log4j-text.properties"}). Ce chemin dépendait du répertoire courant au moment du lancement, ce qui causait l'erreur \texttt{FileNotFoundException} lorsque le programme était lancé depuis un répertoire différent de la racine du projet.
+
+\paragraph{} Nous avons modifié \texttt{LoggerUtility} pour charger les properties via \texttt{getResourceAsStream} depuis le classpath (\texttt{"log/log4j-text.properties"}), exactement comme pour les sprites. Les fichiers \texttt{.properties} étant dans \texttt{src/log/}, ils sont bien présents dans le classpath et toujours trouvés, quelle que soit la configuration Eclipse.
+
+\subsubsection{Problème 4 : Boucles infinies de déplacement des souris}
+
+\paragraph{} Sans précaution, les souris se retrouvaient fréquemment bloquées dans des boucles de déplacement entre deux cases adjacentes, rendant la simulation statique et peu intéressante à observer. Ce phénomène était particulièrement visible quand plusieurs souris se trouvaient dans une zone avec peu de cases libres.
+
+\paragraph{} Nous avons implémenté un mécanisme anti-boucle basé sur un historique des 6 dernières positions de chaque souris. Avant de choisir une case candidate, les cases présentes dans l'historique sont exclues de la liste des candidats. Ce mécanisme est implémenté via une \texttt{Deque<String>} par souris dans la table de hachage \texttt{historiquePositions}. Si toutes les cases accessibles sont dans l'historique (situation de blocage total), le filtrage est désactivé pour permettre quand même le déplacement.
+
+\subsubsection{Problème 5 : Souris qui heurtent les mêmes obstacles répétitivement}
+
+\paragraph{} Dans une version préliminaire, les souris pouvaient heurter le même obstacle plusieurs fois par tour, perdant de l'énergie de façon répétée et mourant prématurément. Ce comportement était dû à l'absence de mémorisation des cases dangereuses : une souris essayait de se déplacer vers un obstacle, échouait, puis recommençait le tour suivant.
+
+\paragraph{} La solution a été d'enrichir la classe \texttt{Memoire} avec une liste \texttt{casesDangereuses}. Chaque fois qu'une souris tente de se déplacer vers un obstacle, la case est immédiatement ajoutée à \texttt{casesDangereuses} et sera exclue de toutes les futures décisions de déplacement (priorité 7). Ce mécanisme simule l'apprentissage par l'expérience négative.
+
+\subsubsection{Problème 6 : Fichier GameDisplay.java vidé par erreur d'encodage}
+
+\paragraph{} Lors d'une modification automatique du fichier \texttt{GameDisplay.java} via un script Python, une erreur d'encodage UTF-8 a causé la troncature puis le vidage complet du fichier. Ce fichier, qui contient plus de 600 lignes de code, se retrouvait entièrement vide, ce qui bloquait totalement la compilation.
+
+\paragraph{} Nous avons restauré le fichier depuis la sauvegarde disponible dans le dossier de backup, puis réintégré manuellement toutes les fonctionnalités ajoutées après la sauvegarde (trésor, écrans de fin, flashes PIEGE, score en barre d'état). Cette expérience nous a enseigné l'importance de sauvegardes régulières et de la gestion de version.
+
+\subsubsection{Problème 7 : Trésor inaccessible (entouré d'obstacles)}
+
+\paragraph{} Dans une première version du système trésor, nous avions placé automatiquement 2 obstacles autour de la case trésor pour le ``protéger'' et le rendre plus difficile d'accès. En pratique, cette approche rendait le trésor totalement inaccessible : les souris ne pouvaient pas l'atteindre, car elles devaient contourner les obstacles tout en maintenant une énergie $\geq 85$, ce qui était impossible dans la plupart des configurations.
+
+\paragraph{} Nous avons supprimé la génération automatique d'obstacles autour du trésor et simplifié les conditions d'accès à des valeurs réalistes mais exigeantes : énergie $\geq 85$, âge $\geq 15$, mémoire $\geq 5$ cases, relations $\geq 2$ souris. Ces conditions garantissent que le trésor est difficile mais atteignable.
+
+\subsubsection{Problème 8 : Redémarrage automatique indésirable}
+
+\paragraph{} Une version intermédiaire du projet implémentait un redémarrage automatique de la simulation après 5 secondes à la fin. Ce comportement était gênant : l'utilisateur n'avait pas le temps de lire l'écran de fin (identité de la gagnante, statistiques finales) avant que la simulation ne reparte.
+
+\paragraph{} Nous avons supprimé le thread de redémarrage automatique. Désormais, la simulation se met en pause sur l'écran de fin et attend que l'utilisateur clique manuellement sur le bouton de relance. Ce bouton est cliquable (détecté dans le \texttt{MouseListener} de \texttt{GameDisplay}) et déclenche un appel à \texttt{manager.reset()} suivi d'une réinitialisation de l'interface.
+
+\bigskip
+
+\subsection{Les tests JUnit}
+
+\paragraph{} Les tests automatisés sont une part essentielle de la qualité du projet. Nous avons utilisé le framework \textbf{JUnit 4.11} fourni par M. Liu dans le cadre du TD 5. Cinq classes de tests couvrent les composants principaux du projet.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|p{8.5cm}|}
+\hline
+\textbf{Classe de test} & \textbf{Cas de tests couverts} \\
+\hline
+\texttt{TestSouris} & Création d'une souris, énergie initiale correcte, décrémentation d'énergie, mort quand énergie = 0, incrémentation de l'âge \\
+\hline
+\texttt{TestInteractions} & Partage D$\rightarrow$R (SINCERE donne vraie info), partage (MECHANTE donne fausse info), reproduction (conditions remplies), flash PIEGE (obstacle sur cible partagée) \\
+\hline
+\texttt{TestEnvironnement} & \texttt{nextRound()} (tour incrémenté), \texttt{addFood()} (nourriture ajoutée), \texttt{addObstacle()} (obstacle ajouté), \texttt{reset()} (état réinitialisé), convergence (score stable) \\
+\hline
+\texttt{TestGame} & Test d'intégration : lancement de la simulation, exécution de 10 tours, vérification que les souris sont vivantes et la grille cohérente \\
+\hline
+\texttt{TestSuiteAll} & Suite JUnit regroupant les quatre classes de tests ci-dessus en une seule exécution \\
+\hline
+\end{tabular}
+\caption{Classes de tests JUnit et cas couverts}
+\label{tab:tests}
+\end{table}
+
+\paragraph{} Chaque test vérifie un comportement atomique et indépendant. Par exemple, \texttt{TestSouris} vérifie qu'une souris créée avec énergie 80 a bien 80 points après création, qu'après 5 appels à \texttt{perdreEnergie(1)} elle a 75 points, et qu'après 80 appels supplémentaires elle est marquée comme morte (\texttt{estVivante() == false}).
+
+\paragraph{} Les tests \texttt{TestInteractions} sont particulièrement importants car ils vérifient les comportements sociaux qui sont au cœur de la simulation. Ils s'assurent notamment qu'une souris SINCERE transmet bien la vraie position de la nourriture, qu'une souris MECHANTE transmet bien une fausse position, et qu'un flash PIEGE est bien créé quand le Receveur heurte l'obstacle indiqué.
+
+\paragraph{} La suite \texttt{TestSuiteAll} permet d'exécuter tous les tests en une seule fois via un clic droit $\rightarrow$ Run As $\rightarrow$ JUnit Test sur la classe \texttt{TestSuiteAll.java}.
